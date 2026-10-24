@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Heirloom — Digital Inheritance, Deliberately Protected</title>
+<meta name="description" content="Heirloom is a trust-minimized digital inheritance system for protecting important assets, instructions and access rules.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --ink:#17181b;
+  --navy:#171943;
+  --navy-2:#25275b;
+  --cream:#f3f1ea;
+  --paper:#faf9f4;
+  --white:#fff;
+  --line:#d8d7d0;
+  --muted:#70716c;
+  --soft:#e8e6de;
+  --lime:#d4e66b;
+  --moss:#55745f;
+  --rust:#c96b51;
+  --lav:#d9d7f3;
+  --shadow:0 20px 70px rgba(20,21,42,.09);
+  --shadow-sm:0 8px 28px rgba(20,21,42,.065);
+  --radius:22px;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+html[data-theme="dark"]{
+  --ink:#f1f0e9;
+  --navy:#0e1031;
+  --navy-2:#1b1e4a;
+  --cream:#0b0c14;
+  --paper:#12141d;
+  --white:#171923;
+  --line:#2a2c38;
+  --muted:#a0a1a7;
+  --soft:#1d1f29;
+  --lime:#d4e66b;
+  --moss:#7ca987;
+  --rust:#d9856c;
+  --lav:#6f70a8;
+  --shadow:0 22px 80px rgba(0,0,0,.34);
+  --shadow-sm:0 8px 30px rgba(0,0,0,.22);
+}
+html[data-theme="dark"] body:before{opacity:.025}
+html[data-theme="dark"] .nav{background:rgba(18,20,29,.90);border-color:#30323e}
+html[data-theme="dark"] .nav-link:hover,html[data-theme="dark"] .nav-link.active{background:#20222d}
+html[data-theme="dark"] .nav-status{background:#171923}
+html[data-theme="dark"] .menu{background:#171923;color:var(--ink)}
+html[data-theme="dark"] .card,html[data-theme="dark"] .panel,html[data-theme="dark"] .form-card,html[data-theme="dark"] .guardian{background:var(--paper)}
+html[data-theme="dark"] .stat,html[data-theme="dark"] .choice{background:#171923}
+html[data-theme="dark"] .trust-band{background:#1a1c25}
+html[data-theme="dark"] .step{background:#20222b;border-color:#30323b}
+html[data-theme="dark"] .field input{background:#171923;color:var(--ink)}
+html[data-theme="dark"] .mobile-panel{background:var(--paper)}
+html[data-theme="dark"] .modal{background:var(--paper)}
+html[data-theme="dark"] .modal-close{background:#252730;color:var(--ink)}
+html[data-theme="dark"] .btn[style*="background"]{background:#242630!important;color:var(--ink)}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:var(--cream);
+  color:var(--ink);
+  font-family:"DM Sans",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+button,input{font:inherit}
+button{cursor:pointer}
+a{color:inherit;text-decoration:none}
+::selection{background:var(--lime);color:var(--ink)}
+
+body:before{
+  content:"";
+  position:fixed;inset:0;pointer-events:none;z-index:1000;opacity:.035;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+}
+
+/* Opening sequence — continuity becomes direction */
+.opening-sequence{
+  position:fixed;inset:0;z-index:9999;
+  display:grid;place-items:center;
+  background:var(--navy);color:#fff;overflow:hidden;
+  transition:opacity .72s var(--ease),visibility .72s var(--ease),transform .72s var(--ease);
+}
+.opening-sequence:before{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.08;
+  background-image:linear-gradient(rgba(255,255,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.07) 1px,transparent 1px);
+  background-size:42px 42px;
+  mask-image:radial-gradient(circle at 50% 48%,#000 0 35%,transparent 76%);
+}
+.opening-sequence.is-hidden{opacity:0;visibility:hidden;pointer-events:none;transform:scale(1.015)}
+.opening-stage{position:relative;width:min(760px,90vw);text-align:center;padding:32px}
+.opening-graphic{width:100%;height:auto;overflow:visible;filter:drop-shadow(0 16px 44px rgba(0,0,0,.18))}
+.opening-track{fill:none;stroke:rgba(255,255,255,.10);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+.opening-trace{
+  fill:none;stroke:url(#heirloomStroke);stroke-width:5;stroke-linecap:round;stroke-linejoin:round;
+  stroke-dasharray:1130;stroke-dashoffset:1130;
+  animation:traceContinuity 5.6s .35s cubic-bezier(.65,0,.22,1) forwards;
+}
+.loader-arrow{filter:drop-shadow(0 0 12px rgba(217,240,107,.28))}
+.loader-arrow path{fill:var(--lime)}
+.opening-wordmark{
+  margin-top:8px;font:600 clamp(34px,5vw,50px) "Space Grotesk",sans-serif;
+  letter-spacing:-.065em;opacity:0;transform:translateY(10px);
+  animation:openingText .7s 4.75s var(--ease) forwards;
+}
+.opening-caption{
+  margin-top:8px;color:rgba(255,255,255,.54);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  opacity:0;animation:openingCaption .65s 5.0s ease forwards;
+}
+.opening-progress{width:min(260px,58vw);height:1px;margin:24px auto 0;background:rgba(255,255,255,.14);overflow:hidden}
+.opening-progress:after{content:"";display:block;width:100%;height:100%;background:var(--lime);transform:translateX(-100%);animation:openingProgress 5.8s .25s linear forwards}
+@keyframes traceContinuity{to{stroke-dashoffset:0}}
+@keyframes openingText{to{opacity:1;transform:none}}
+@keyframes openingCaption{to{opacity:1}}
+@keyframes openingProgress{to{transform:none}}
+@media(prefers-reduced-motion:reduce){
+  .opening-trace,.opening-wordmark,.opening-caption,.opening-progress:after{animation:none!important;opacity:1!important;transform:none!important;stroke-dashoffset:0!important}
+  .loader-arrow{display:none}
+}
+
+.topline{
+  height:4px;background:linear-gradient(90deg,var(--navy),#3938a4,var(--lime),var(--rust),var(--navy));
+  background-size:220% 100%;animation:flow 12s linear infinite;
+}
+@keyframes flow{to{background-position:220% 0}}
+
+
+.protection-summary{
+  width:min(420px,100%);margin:auto;padding:26px;border-radius:26px;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);
+  box-shadow:0 24px 65px rgba(0,0,0,.18);backdrop-filter:blur(10px)
+}
+.protection-summary-head{display:flex;align-items:center;justify-content:space-between;gap:18px;padding-bottom:18px;border-bottom:1px solid rgba(255,255,255,.11)}
+.protection-summary-brand{display:flex;align-items:center;gap:11px}.protection-summary-brand svg{width:37px;height:27px;color:var(--lime)}
+.protection-summary-brand b{font:600 15px "Space Grotesk"}.protection-summary-head small{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#aeb0c3}
+.protection-chain{display:grid;gap:9px;margin-top:18px}
+.chain-step{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:12px;padding:12px 13px;border-radius:14px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08)}
+.chain-step strong{display:grid;place-items:center;width:28px;height:28px;border-radius:9px;background:rgba(217,240,107,.12);color:var(--lime);font:700 10px "Space Grotesk"}
+.chain-step b{display:block;font-size:11px}.chain-step span{display:block;margin-top:2px;font-size:9px;color:#aeb0c3;line-height:1.35}.chain-step em{font-style:normal;font-size:10px;color:var(--lime);font-weight:700}
+.protection-summary-note{margin:16px 2px 0;color:#aeb0c3;font-size:10px;line-height:1.55}
+
+.rule-map{display:grid;grid-template-columns:.78fr 1.22fr;gap:24px;align-items:center;margin-top:32px;padding:22px;border:1px solid rgba(255,255,255,.1);border-radius:24px;background:rgba(255,255,255,.035)}
+.rule-map-copy{padding:15px 15px 15px 8px}.rule-index{font-size:9px;letter-spacing:.16em;color:#9fa0b5;font-weight:700}
+.rule-map-copy h3{font:600 30px/1.02 "Space Grotesk";letter-spacing:-.05em;margin:13px 0}.rule-map-copy h3 span{font-family:"Playfair Display";font-style:italic;color:#d7d6e5}.rule-map-copy p{font-size:11px;line-height:1.65;color:#999aaf;margin:0;max-width:310px}
+.rule-sequence{display:grid;gap:8px;position:relative}
+.rule-sequence:before{content:"";position:absolute;left:20px;top:30px;bottom:30px;width:1px;background:linear-gradient(var(--lime),rgba(217,240,107,.18))}
+.rule-step{position:relative;display:grid;grid-template-columns:42px 1fr auto;gap:14px;align-items:center;padding:13px 14px;border-radius:16px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.10)}
+.rule-step-num{position:relative;z-index:1;width:40px;height:40px;border-radius:13px;display:grid;place-items:center;background:#24265d;border:1px solid rgba(255,255,255,.14);color:var(--lime);font:700 10px "Space Grotesk"}
+.rule-step b{display:block;font:600 12px "Space Grotesk"}.rule-step span{display:block;margin-top:3px;font-size:9px;color:#a9aabd;line-height:1.45}.rule-step i{font-style:normal;color:var(--lime);font-size:15px}
+
+.shell{min-height:100vh}
+.nav-wrap{
+  position:sticky;top:0;z-index:80;
+  padding:18px 24px 12px;
+  background:linear-gradient(var(--cream) 65%,rgba(247,245,239,0));
+  backdrop-filter:blur(14px);
+}
+.nav{
+  max-width:1280px;margin:auto;
+  min-height:66px;padding:9px 10px 9px 18px;
+  display:flex;align-items:center;gap:16px;
+  border:1px solid rgba(16,17,22,.10);
+  border-radius:999px;background:rgba(252,251,247,.90);
+  box-shadow:0 8px 30px rgba(16,17,22,.055);
+}
+.brand{display:flex;align-items:center;gap:10px;min-width:170px}
+.brand-mark{
+  width:40px;height:40px;border-radius:13px;background:var(--navy);color:#fff;
+  display:grid;place-items:center;position:relative;overflow:hidden;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);
+}
+.brand-mark svg{width:29px;height:24px;overflow:visible}
+.brand-mark .loop{fill:none;stroke:var(--lime);stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round}
+.brand-mark .tip{fill:var(--lime)}
+.brand-mark .spark{fill:#fff;opacity:.7}
+.brand:hover .brand-mark .loop{animation:logoLoop .8s var(--ease)}
+@keyframes logoLoop{50%{transform:translateX(1px) rotate(-5deg)}}
+.theme-toggle{
+  width:39px;height:39px;border:1px solid var(--line);border-radius:50%;
+  background:var(--paper);color:var(--ink);display:grid;place-items:center;
+  transition:.28s var(--ease);flex:none;
+}
+.theme-toggle:hover{transform:rotate(12deg);background:var(--soft)}
+.theme-toggle svg{width:17px;height:17px}
+
+.brand-name{font-family:"Space Grotesk";font-size:16px;font-weight:700;letter-spacing:-.03em}
+.brand-sub{font-size:9px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-top:1px}
+.nav-links{display:flex;align-items:center;gap:3px;margin:auto}
+.nav-link{
+  border:0;background:transparent;color:#777970;padding:11px 14px;border-radius:999px;
+  font-size:13px;font-weight:600;transition:.28s var(--ease);position:relative;
+}
+.nav-link:hover{color:var(--ink);background:#f0efe9}
+.nav-link.active{color:var(--ink);background:#e9e8e0}
+.nav-link.active:after{
+  content:"";position:absolute;left:50%;bottom:4px;width:4px;height:4px;border-radius:50%;
+  transform:translateX(-50%);background:var(--rust)
+}
+.nav-status{
+  display:flex;align-items:center;gap:8px;border:1px solid var(--line);
+  background:#fff;padding:9px 13px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap;
+}
+.status-dot{width:7px;height:7px;border-radius:50%;background:#6eaa79;box-shadow:0 0 0 5px rgba(110,170,121,.12)}
+.menu{display:none;border:1px solid var(--line);background:#fff;border-radius:50%;width:42px;height:42px}
+
+main{max-width:1280px;margin:auto;padding:12px 24px 90px}
+.page{display:none;animation:pageIn .48s var(--ease)}
+.page.active{display:block}
+@keyframes pageIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:7px 11px;border:1px solid rgba(16,17,22,.11);border-radius:999px;
+  background:rgba(255,255,255,.68);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#65675f;
+}
+.eyebrow i{display:block;width:6px;height:6px;border-radius:50%;background:var(--rust)}
+h1,h2,h3,p{margin-top:0}
+.display{
+  font-family:"Space Grotesk",sans-serif;font-weight:600;letter-spacing:-.065em;
+}
+.serif{font-family:"Playfair Display",Georgia,serif}
+.muted{color:var(--muted)}
+.kicker{font-size:12px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#74766e}
+
+.hero{
+  position:relative;overflow:hidden;min-height:650px;padding:76px 72px 68px;
+  border-radius:38px;background:var(--navy);color:#fff;box-shadow:var(--shadow);
+}
+.hero:before{
+  content:"";position:absolute;width:600px;height:600px;right:-190px;top:-220px;border-radius:50%;
+  background:radial-gradient(circle,rgba(127,124,255,.38),transparent 67%);
+}
+.hero:after{
+  content:"";position:absolute;inset:0;opacity:.10;pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.09) 1px,transparent 1px);
+  background-size:42px 42px;
+  mask-image:linear-gradient(90deg,#000,transparent 82%);
+}
+.hero-grid{position:relative;z-index:1;display:grid;grid-template-columns:1.08fr .92fr;gap:64px;align-items:center}
+.hero h1{font-size:clamp(54px,6vw,88px);line-height:.94;margin:24px 0 24px;max-width:720px}
+.hero h1 .accent{color:var(--lime)}
+.hero-copy{max-width:650px;color:#d9d9e6;font-size:17px;line-height:1.65}
+.hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:34px}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;border:1px solid transparent;
+  border-radius:999px;padding:13px 18px;font-size:13px;font-weight:700;transition:.3s var(--ease);
+}
+.btn-primary{background:var(--lime);color:var(--ink)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(217,240,107,.16)}
+.btn-ghost{background:rgba(255,255,255,.07);color:#fff;border-color:rgba(255,255,255,.18)}
+.btn-ghost:hover{background:rgba(255,255,255,.13)}
+.hero-note{display:flex;gap:20px;flex-wrap:wrap;margin-top:26px;color:#aaaabd;font-size:11px}
+.hero-note span{display:flex;align-items:center;gap:7px}.hero-note b{color:#fff}
+
+.section-head{display:flex;justify-content:space-between;gap:30px;align-items:end;margin:96px 0 28px}
+.section-head h2{font-size:clamp(35px,4vw,58px);line-height:.98;margin:8px 0 0}
+.section-head p{max-width:450px;color:var(--muted);line-height:1.6;margin:0}
+
+.principles{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{
+  border:1px solid var(--line);background:var(--paper);border-radius:var(--radius);padding:26px;
+  box-shadow:0 4px 0 rgba(16,17,22,.015);transition:.32s var(--ease);
+}
+.card:hover{transform:translateY(-5px);box-shadow:var(--shadow-sm);border-color:#cacbc2}
+.card-num{font-family:"Space Grotesk";font-size:11px;color:#8b8d84;font-weight:700;letter-spacing:.12em}
+.card h3{font-family:"Space Grotesk";font-size:22px;letter-spacing:-.04em;margin:40px 0 10px}
+.card p{color:var(--muted);font-size:14px;line-height:1.65;margin:0}
+
+.trust-band{
+  margin-top:14px;border-radius:var(--radius);background:#e9e7df;padding:36px;
+  display:grid;grid-template-columns:.75fr 1.25fr;gap:35px;align-items:center;
+}
+.trust-band h3{font-family:"Space Grotesk";font-size:30px;letter-spacing:-.045em;margin:0 0 10px}
+.trust-band p{margin:0;color:#666960;line-height:1.6;font-size:14px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.step{padding:18px;border-radius:18px;background:rgba(255,255,255,.6);border:1px solid rgba(16,17,22,.08)}
+.step b{display:block;font-family:"Space Grotesk";font-size:13px;margin-bottom:6px}.step span{font-size:11px;color:#6c6e66;line-height:1.5}
+
+.app-head{display:flex;justify-content:space-between;align-items:end;gap:20px;margin:55px 0 28px}
+.app-head h1{font-size:54px;line-height:1;margin:8px 0 0}
+.app-head p{color:var(--muted);max-width:520px;line-height:1.6;margin:0}
+.workspace{display:grid;grid-template-columns:1.25fr .75fr;gap:14px}
+.panel{border:1px solid var(--line);border-radius:var(--radius);background:var(--paper);padding:28px}
+.panel.dark{background:var(--navy);color:#fff;border-color:var(--navy)}
+.panel-title{display:flex;justify-content:space-between;align-items:start;gap:15px;margin-bottom:22px}
+.panel-title h3{font-family:"Space Grotesk";font-size:20px;letter-spacing:-.04em;margin:0}
+.panel-title span{font-size:10px;color:#898b83;text-transform:uppercase;letter-spacing:.1em;font-weight:700}
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{padding:17px;border:1px solid var(--line);border-radius:17px;background:#fff}
+.stat strong{display:block;font-family:"Space Grotesk";font-size:28px;letter-spacing:-.05em}.stat small{color:var(--muted);font-size:10px}
+.activity{margin-top:10px}.activity-item{display:flex;gap:13px;padding:15px 0;border-bottom:1px solid var(--line)}.activity-item:last-child{border-bottom:0}
+.activity-icon{width:31px;height:31px;border-radius:10px;background:#e9eee9;display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--moss);flex:none}
+.activity-item b{display:block;font-size:12px}.activity-item span{display:block;font-size:11px;color:var(--muted);margin-top:3px}
+.coverage{display:grid;place-items:center;padding:16px 0 24px}
+.ring{width:160px;height:160px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--lime) 0 78%,#36376d 78% 100%);position:relative}
+.ring:after{content:"";position:absolute;inset:13px;background:var(--navy);border-radius:50%}
+.ring strong{position:relative;z-index:1;font-family:"Space Grotesk";font-size:34px}.ring small{position:absolute;z-index:1;margin-top:52px;color:#b7b7c9;font-size:9px;letter-spacing:.12em;text-transform:uppercase}
+.mini-list{display:grid;gap:8px}.mini-row{display:flex;justify-content:space-between;gap:15px;padding:12px 0;border-top:1px solid rgba(255,255,255,.1);font-size:11px}.mini-row span{color:#a7a7bc}.ok{color:#d9f06b!important;font-weight:700}
+
+.vault-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.vault-card{min-height:210px;display:flex;flex-direction:column;justify-content:space-between}
+.vault-icon{width:42px;height:42px;border-radius:14px;background:#ecece5;display:grid;place-items:center;font-family:"Space Grotesk";font-weight:700}
+.vault-card h3{font-family:"Space Grotesk";font-size:17px;letter-spacing:-.035em;margin:28px 0 7px}.vault-card p{font-size:11px;color:var(--muted);line-height:1.5;margin:0}
+.vault-meta{display:flex;justify-content:space-between;align-items:center;margin-top:20px;font-size:10px;color:#81837b}.tag{padding:5px 8px;border-radius:999px;background:#edf2df;color:#56704c;font-weight:700}
+
+.protocol{
+  background:var(--navy);border-radius:30px;color:#fff;padding:35px;position:relative;overflow:hidden;
+}
+.protocol:after{content:"";position:absolute;right:-130px;bottom:-190px;width:430px;height:430px;border:1px solid rgba(255,255,255,.1);border-radius:50%}
+.protocol-top{display:flex;justify-content:space-between;gap:20px;align-items:start}.protocol h2{font-family:"Space Grotesk";font-size:42px;letter-spacing:-.055em;margin:7px 0 10px}.protocol p{color:#b9bac9;max-width:590px;line-height:1.6;font-size:13px}
+.window{padding:18px;border-radius:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);min-width:180px}.window b{display:block;font-family:"Space Grotesk";font-size:28px}.window span{font-size:9px;color:#aaaabd;letter-spacing:.12em;text-transform:uppercase}
+.timeline{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:35px}.timeline-step{padding:18px;border-top:2px solid #3a3b72}.timeline-step.active{border-color:var(--lime)}.timeline-step em{font-style:normal;font-size:10px;color:#a9aabd}.timeline-step b{display:block;font-family:"Space Grotesk";margin:7px 0 4px}.timeline-step span{font-size:10px;color:#9f9fb2;line-height:1.45}
+
+.guardian-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.guardian{padding:23px;border:1px solid var(--line);border-radius:22px;background:#fff}.avatar{width:45px;height:45px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-family:"Space Grotesk";font-weight:700}.guardian h3{font-family:"Space Grotesk";font-size:17px;margin:17px 0 3px}.guardian p{font-size:11px;color:var(--muted);margin:0 0 17px}.guardian-status{display:flex;align-items:center;gap:7px;font-size:10px;font-weight:700}.guardian-status i{width:6px;height:6px;border-radius:50%;background:#6eaa79}
+
+.form-shell{max-width:880px;margin:55px auto 0}.form-card{background:#fff;border:1px solid var(--line);border-radius:30px;padding:38px;box-shadow:var(--shadow-sm)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.field{display:grid;gap:7px}.field.full{grid-column:1/-1}.field label{font-size:11px;font-weight:700;color:#555850;text-transform:uppercase;letter-spacing:.08em}.field input{width:100%;border:1px solid var(--line);background:#fbfaf6;border-radius:13px;padding:13px 14px;outline:none;transition:.2s}.field input:focus{border-color:#8d8e86;box-shadow:0 0 0 4px rgba(16,17,22,.045)}
+.threshold{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.choice{border:1px solid var(--line);background:#fbfaf6;border-radius:14px;padding:14px;text-align:left}.choice.selected{border-color:var(--navy);background:#f0f0fa}.choice b{display:block;font-family:"Space Grotesk";font-size:15px}.choice span{font-size:10px;color:var(--muted)}
+.form-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:26px;padding-top:22px;border-top:1px solid var(--line)}
+
+
+/* Native emoji safety: keeps symbols visible in both themes */
+.emoji,.activity-icon,.vault-icon,.btn span,[aria-label*="emoji"]{
+  font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Twemoji Mozilla",sans-serif;
+  font-variant-emoji:emoji;
+  -webkit-font-smoothing:auto;
+}
+.dark-mode .emoji,.dark-mode .activity-icon,.dark-mode .vault-icon{
+  filter:none;
+}
+
+.modal-backdrop{position:fixed;inset:0;background:rgba(8,9,22,.58);backdrop-filter:blur(8px);z-index:200;display:none;place-items:center;padding:20px}.modal-backdrop.open{display:grid}.modal{max-width:560px;width:100%;background:var(--paper);border-radius:28px;padding:30px;box-shadow:0 30px 100px rgba(0,0,0,.25)}.modal h2{font-family:"Space Grotesk";font-size:28px;letter-spacing:-.045em;margin:0 0 10px}.modal p{color:var(--muted);font-size:13px;line-height:1.65}.modal-close{float:right;border:0;background:#ecece5;border-radius:50%;width:34px;height:34px}
+.toast{position:fixed;right:24px;bottom:24px;z-index:250;padding:13px 16px;border-radius:15px;background:var(--ink);color:#fff;font-size:12px;box-shadow:var(--shadow);animation:toast .35s var(--ease)}@keyframes toast{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+.mobile-panel{display:none}
+
+
+#page-home.intro-complete .hero{animation:heroArrival .72s var(--ease) both}
+@keyframes heroArrival{from{opacity:.55;transform:translateY(10px) scale(.995)}to{opacity:1;transform:none}}
+.opening-sequence.returning .opening-stage{transform:scale(.96);opacity:.9}
+
+@media(max-width:1050px){
+  .nav-links{display:none}.menu{display:block;margin-left:auto}
+  .nav-status{margin-left:auto}.brand{min-width:auto}
+  .hero{padding:55px 45px}.hero-grid{grid-template-columns:1fr}.protection-summary{max-width:420px}
+  .vault-grid{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:760px){
+  .nav-wrap{padding:10px 12px}.nav{min-height:58px;padding-left:12px}.brand-sub{display:none}.nav-status{display:none}
+  main{padding:8px 13px 65px}
+  .hero{padding:42px 25px 38px;border-radius:28px;min-height:auto}.hero h1{font-size:53px}.hero-copy{font-size:15px}.hero-actions .btn{width:100%}.hero-note{display:grid;gap:8px}
+  .protection-summary{margin-top:18px;padding:20px}.chain-step{grid-template-columns:32px 1fr auto;padding:11px}.protection-summary-note{font-size:9px}
+  .section-head,.app-head{display:block;margin:65px 0 22px}.section-head p{margin-top:15px}.app-head h1{font-size:44px}.app-head p{margin-top:12px}
+  .principles,.trust-band,.workspace,.guardian-grid,.form-grid,.rule-map{grid-template-columns:1fr}.steps,.timeline{grid-template-columns:1fr}
+  .rule-map-copy{padding:8px}.rule-sequence{margin-top:6px}
+  .trust-band{padding:25px}.vault-grid{grid-template-columns:1fr 1fr}.stat-row{grid-template-columns:1fr 1fr}.panel{padding:22px}
+  .protocol{padding:25px}.protocol-top{display:block}.window{margin-top:20px}.protocol h2{font-size:35px}
+  .form-card{padding:23px;border-radius:24px}.threshold{grid-template-columns:1fr}
+  .mobile-panel{position:absolute;left:12px;right:12px;top:72px;background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:10px;box-shadow:var(--shadow);display:none}
+  .mobile-panel.open{display:grid;animation:pageIn .3s var(--ease)}
+  .mobile-panel button{border:0;background:transparent;text-align:left;padding:13px;border-radius:13px;font-weight:600;font-size:13px}.mobile-panel button:hover{background:#ecece5}
+}
+/* Authentication Modal Custom Integration */
+.auth-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 9, 22, 0.58);
+  backdrop-filter: blur(8px);
+  z-index: 300;
+  display: none;
+  place-items: center;
+  padding: 20px;
+}
+.auth-modal-backdrop:not(.hidden) {
+  display: grid;
+}
+.auth-modal-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  padding: 32px;
+  box-shadow: var(--shadow);
+  color: var(--ink);
+  position: relative;
+  animation: pageIn 0.35s var(--ease);
+}
+.auth-modal-card .field {
+  margin-bottom: 16px;
+}
+.auth-modal-card input {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: var(--soft);
+  color: var(--ink);
+  border-radius: 13px;
+  padding: 13px 14px;
+  outline: none;
+  transition: 0.2s;
+}
+.auth-modal-card input:focus {
+  border-color: #8d8e86;
+  box-shadow: 0 0 0 4px rgba(16, 17, 22, 0.045);
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEIRLOOM OPENING SEQUENCE -->
+<div class="opening-sequence" id="openingSequence" aria-label="Heirloom loading" aria-live="polite">
+  <div class="opening-stage">
+    <svg class="opening-graphic" viewBox="0 0 620 300" role="img" aria-label="An arrow traces an infinity path and resolves into a forward direction">
+      <defs>
+        <linearGradient id="heirloomStroke" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="48%" stop-color="#d9f06b"/>
+          <stop offset="100%" stop-color="#ffffff"/>
+        </linearGradient>
+      </defs>
+      <!-- Starts at the upper-right, crosses to lower-left, loops upper-left → lower-right, then resolves forward. -->
+      <path class="opening-track" d="M468 72 C408 72 364 112 316 154 C260 204 218 234 164 224 C108 214 88 161 112 121 C138 78 193 70 236 105 L382 218 C425 251 482 236 500 194 C518 151 486 109 443 105 C399 101 369 132 331 162 L219 248 C191 270 164 274 140 269 M331 162 C381 124 423 99 468 105 C515 111 543 144 543 174 L543 174 M543 174 H584"/>
+      <path class="opening-trace" d="M468 72 C408 72 364 112 316 154 C260 204 218 234 164 224 C108 214 88 161 112 121 C138 78 193 70 236 105 L382 218 C425 251 482 236 500 194 C518 151 486 109 443 105 C399 101 369 132 331 162 L219 248 C191 270 164 274 140 269 M331 162 C381 124 423 99 468 105 C515 111 543 144 543 174 M543 174 H584"/>
+      <g class="loader-arrow">
+        <path d="M-9 -6 L8 0 L-9 6 L-4 0 Z"/>
+        <animateMotion dur="5.6s" begin="0.35s" fill="freeze" rotate="auto" path="M468 72 C408 72 364 112 316 154 C260 204 218 234 164 224 C108 214 88 161 112 121 C138 78 193 70 236 105 L382 218 C425 251 482 236 500 194 C518 151 486 109 443 105 C399 101 369 132 331 162 L219 248 C191 270 164 274 140 269 M331 162 C381 124 423 99 468 105 C515 111 543 144 543 174 M543 174 H584"/>
+      </g>
+    </svg>
+    <div class="opening-wordmark">heirloom</div>
+    <div class="opening-caption">trust-minimized digital inheritance</div>
+    <div class="opening-progress" aria-hidden="true"></div>
+  </div>
+</div>
+
+<div class="topline"></div>
+<div class="shell">
+  <div class="nav-wrap">
+    <nav class="nav">
+      <button class="brand" onclick="navigate('home')" aria-label="Go to home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 40 30">
+            <path class="loop" d="M4 15C4 8 10 5 15 5c6 0 9 4 13 10 4 6 7 10 12 10"/>
+            <path class="loop" d="M4 15c0 7 6 10 11 10 6 0 9-4 13-10 4-6 7-10 12-10"/>
+            <path class="loop" d="M31 15h6"/>
+            <path class="tip" d="M34.5 11.5 40 15l-5.5 3.5z"/>
+          </svg>
+        </span>
+        <span><span class="brand-name">heirloom</span><span class="brand-sub">digital inheritance</span></span>
+      </button>
+
+      <div class="nav-links" id="navLinks">
+        <button class="nav-link active" data-page="home" onclick="navigate('home')">Home</button>
+        <button class="nav-link" data-page="vault" onclick="navigate('vault')">Your vault</button>
+        <button class="nav-link" data-page="protection" onclick="navigate('protection')">Protection</button>
+        <button class="nav-link" data-page="people" onclick="navigate('people')">Trusted people</button>
+        <button class="nav-link" data-page="activity" onclick="navigate('activity')">Activity</button>
+      </div>
+
+      <div class="nav-status"><i class="status-dot"></i><span>Protection active</span></div>
+      <button class="btn btn-ghost" style="color: var(--ink); border-color: var(--line); padding: 8px 14px; font-size: 12px;" onclick="openAuthModal(false)">Sign in</button>
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Switch theme"></button>
+      <button class="menu" onclick="toggleMenu()" aria-label="Open navigation">☰</button>
+    </nav>
+    <div class="mobile-panel" id="mobilePanel">
+      <button onclick="navigate('home');toggleMenu()">Home</button>
+      <button onclick="navigate('vault');toggleMenu()">Your vault</button>
+      <button onclick="navigate('protection');toggleMenu()">Protection</button>
+      <button onclick="navigate('people');toggleMenu()">Trusted people</button>
+      <button onclick="navigate('activity');toggleMenu()">Activity</button>
+      <button onclick="navigate('setup');toggleMenu()">Protection settings</button>
+    </div>
+  </div>
+
+  <main>
+    <!-- HOME -->
+    <section class="page active" id="page-home">
+      <div class="hero">
+        <div class="hero-grid">
+          <div>
+            <div class="eyebrow" style="background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.14);color:#c8c8d8"><i></i> Digital inheritance, without guesswork</div>
+            <h1 class="display">Leave a <span class="accent">clear path</span>, not a trail of passwords.</h1>
+            <p class="hero-copy">Heirloom helps you organize the digital things that matter, define exactly what should happen if you cannot decide for yourself, and put independent people around that decision.</p>
+            <div class="hero-actions">
+              <button class="btn btn-primary" onclick="navigate('setup')">Build my protection plan <span>↗</span></button>
+              <button class="btn btn-ghost" onclick="openModal()">How it works <span>＋</span></button>
+            </div>
+            <div class="hero-note">
+              <span>✓ <b>No single person</b> controls release</span>
+              <span>✓ <b>Time to intervene</b> before handover</span>
+              <span>✓ <b>One organized place</b> for what matters</span>
+            </div>
+          </div>
+
+          <aside class="protection-summary" aria-label="Heirloom protection model" data-backend-section="protection-summary">
+            <div class="protection-summary-head">
+              <div class="protection-summary-brand">
+                <svg viewBox="0 0 48 28" aria-hidden="true"><path d="M4 14C4 5 12 2 18 2c7 0 10 6 15 12 5 6 8 12 15 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="M4 14c0 9 8 12 14 12 7 0 10-6 15-12C38 8 41 2 48 2" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+                <div><b>Protected handover</b><small>rules, not a single key</small></div>
+              </div>
+              <small>Protocol</small>
+            </div>
+            <div class="protection-chain">
+              <div class="chain-step"><strong>01</strong><div><b>Condition</b><span>A predefined trigger starts review.</span></div><em>Defined</em></div>
+              <div class="chain-step"><strong>02</strong><div><b>Independent evidence</b><span>Trusted people confirm separately.</span></div><em>2 / 3</em></div>
+              <div class="chain-step"><strong>03</strong><div><b>Intervention window</b><span>The owner can stop a false recovery.</span></div><em>48h</em></div>
+              <div class="chain-step"><strong>04</strong><div><b>Controlled release</b><span>Only approved assets reach beneficiaries.</span></div><em>Bounded</em></div>
+            </div>
+            <p class="protection-summary-note">No platform, guardian or administrator can complete the release alone.</p>
+          </aside>
+        </div>
+      </div>
+
+      <div class="section-head">
+        <div><div class="kicker">The idea</div><h2 class="display">Simple on the surface.<br><span class="serif">Deliberate underneath.</span></h2></div>
+        <p>Heirloom is designed around a simple principle: the person who owns the information should define the rules for when, why and how it can be passed on.</p>
+      </div>
+
+      <div class="principles">
+        <article class="card"><span class="card-num">01 / ORGANIZE</span><h3>Put the important things in order.</h3><p>Documents, digital accounts, assets, instructions and the context someone would actually need — organized into one intentional vault.</p></article>
+        <article class="card"><span class="card-num">02 / DEFINE</span><h3>Decide before the moment arrives.</h3><p>Choose the people, conditions and thresholds that should govern a future handover instead of leaving others to guess.</p></article>
+        <article class="card"><span class="card-num">03 / PROTECT</span><h3>Make access harder to misuse.</h3><p>Recovery is treated as a process, not a button: independent confirmation, a delay and an opportunity to intervene.</p></article>
+      </div>
+
+      <div class="trust-band">
+        <div><div class="kicker">Why this model</div><h3>Trust should be distributed, not assumed.</h3><p>Heirloom's defining idea is not simply storing information securely. It is reducing the amount of trust any one person or platform needs to hold.</p></div>
+        <div class="steps">
+          <div class="step"><b>01 — Signal</b><span>A predefined condition starts the protection process.</span></div>
+          <div class="step"><b>02 — Evidence</b><span>Independent people confirm what is happening.</span></div>
+          <div class="step"><b>03 — Handover</b><span>Only after the configured safeguards are satisfied.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VAULT -->
+    <section class="page" id="page-vault">
+      <div class="app-head"><div><div class="kicker">Private workspace</div><h1 class="display">Your vault.</h1></div><p>A calm, structured place for the information your future self — or the right person — may need.</p></div>
+      <div class="vault-grid">
+        <article class="card vault-card"><div><div class="vault-icon">ID</div><h3>Identity & documents</h3><p>Passports, certificates, legal records and essential identity information.</p></div><div class="vault-meta"><span>12 items</span><span class="tag">Organized</span></div></article>
+        <article class="card vault-card"><div><div class="vault-icon">₿</div><h3>Money & assets</h3><p>Financial records, crypto holdings, policies and important ownership details.</p></div><div class="vault-meta"><span>8 items</span><span class="tag">Protected</span></div></article>
+        <article class="card vault-card"><div><div class="vault-icon">⌂</div><h3>Home & property</h3><p>Property documents, utilities, access notes and practical instructions.</p></div><div class="vault-meta"><span>6 items</span><span class="tag">Protected</span></div></article>
+        <article class="card vault-card"><div><div class="vault-icon">@</div><h3>Digital life</h3><p>Important services, subscriptions, accounts and digital instructions.</p></div><div class="vault-meta"><span>15 items</span><span class="tag">Organized</span></div></article>
+        <article class="card vault-card"><div><div class="vault-icon">→</div><h3>People & instructions</h3><p>Trusted contacts, personal wishes and the context behind each handover.</p></div><div class="vault-meta"><span>9 items</span><span class="tag">Reviewed</span></div></article>
+      </div>
+      <div class="section-head" style="margin-top:70px"><div><div class="kicker">The handover</div><h2 class="display">Information is only useful<br><span class="serif">when it has context.</span></h2></div><p>Every category can carry notes and instructions, so the next person receives a path to follow — not a folder full of unexplained files.</p></div>
+      <div class="workspace">
+        <div class="panel">
+          <div class="panel-title"><h3>Handover checklist</h3><span>4 of 5 complete</span></div>
+          <div class="activity">
+            <div class="activity-item"><div class="activity-icon">✓</div><div><b>Identity records organized</b><span>Reviewed 2 days ago</span></div></div>
+            <div class="activity-item"><div class="activity-icon">✓</div><div><b>Asset instructions added</b><span>Reviewed 5 days ago</span></div></div>
+            <div class="activity-item"><div class="activity-icon">✓</div><div><b>Trusted people confirmed</b><span>Reviewed 1 week ago</span></div></div>
+            <div class="activity-item"><div class="activity-icon">!</div><div><b>Digital account instructions</b><span>One section still needs review</span></div></div>
+          </div>
+        </div>
+        <div class="panel dark">
+          <div class="panel-title"><h3>Vault readiness</h3><span style="color:#a9aabd">Live view</span></div>
+          <div class="coverage"><div class="ring"><strong>78%</strong><small>ready</small></div></div>
+          <div class="mini-list"><div class="mini-row"><span>Organization</span><b class="ok">Complete</b></div><div class="mini-row"><span>Trusted people</span><b class="ok">Complete</b></div><div class="mini-row"><span>Recovery rules</span><b class="ok">Complete</b></div><div class="mini-row"><span>Final review</span><b style="color:#fff">In progress</b></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROTECTION -->
+    <section class="page" id="page-protection">
+      <div class="app-head"><div><div class="kicker">Protection model</div><h1 class="display">Access by protocol.</h1></div><p>The important part is not merely hiding the vault. It is making sure a future handover cannot be triggered casually or unilaterally.</p></div>
+      <div class="protocol">
+        <div class="protocol-top">
+        <!-- Live Backend Status & Heartbeat Widget -->
+<div class="panel" style="margin-top: 24px; background: var(--navy); color: #fff; border-color: var(--navy);">
+    <div class="panel-title">
+        <h3 style="color: #fff;">Live Dead Man's Switch Status</h3>
+        <span style="color: var(--lime);">Backend Connected</span>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+        <div>
+            <div style="font-size: 11px; color: #a9aabd; text-transform: uppercase;">Current State</div>
+            <div id="plan-state-display" class="display" style="font-size: 24px; color: var(--lime);">LOADING...</div>
+        </div>
+        <div>
+            <div style="font-size: 11px; color: #a9aabd; text-transform: uppercase;">Days Remaining</div>
+            <div id="days-remaining-display" class="display" style="font-size: 24px;">-</div>
+        </div>
+    </div>
+    <button class="btn btn-primary" id="liveCheckInBtn" style="width: 100%; justify-content: center;">
+        Check In Now (Reset Heartbeat Timer)
+    </button>
+</div>
+          <div><div class="kicker" style="color:#a9aabd">Current protection</div><h2>Evidence before access.</h2><p>When a recovery condition is reached, the system moves through a deliberate sequence. The owner gets time to intervene, trusted people provide independent confirmation, and only then can the defined handover proceed.</p></div>
+          <div class="window"><b>48h</b><span>intervention window</span></div>
+        </div>
+        <div class="rule-map">
+          <div class="rule-map-copy">
+            <span class="rule-index">THE HANDOVER RULE</span>
+            <h3>One condition.<br><span>Several independent checks.</span></h3>
+            <p>The rule is designed as a chain of responsibility. No single moment, person or signal completes the journey on its own.</p>
+          </div>
+          <div class="rule-sequence" aria-label="Handover authorization sequence" data-backend-section="authorization-sequence">
+            <div class="rule-step"><div class="rule-step-num">01</div><div><b>Condition</b><span>A configured recovery condition is detected.</span></div><i>→</i></div>
+            <div class="rule-step"><div class="rule-step-num">02</div><div><b>Evidence</b><span>Independent confirmations are collected.</span></div><i>→</i></div>
+            <div class="rule-step"><div class="rule-step-num">03</div><div><b>Window</b><span>The owner has time to cancel or intervene.</span></div><i>→</i></div>
+            <div class="rule-step"><div class="rule-step-num">04</div><div><b>Release</b><span>Permitted assets are released only after safeguards pass.</span></div><i>✓</i></div>
+          </div>
+        </div>
+        <div class="timeline">
+          <div class="timeline-step active"><em>01</em><b>Condition detected</b><span>A predefined recovery condition is recognized.</span></div>
+          <div class="timeline-step"><em>02</em><b>Independent confirmation</b><span>Configured trusted people provide the required evidence.</span></div>
+          <div class="timeline-step"><em>03</em><b>Controlled release</b><span>Only the information permitted by the owner's rules is handed over.</span></div>
+        </div>
+      </div>
+      <div class="section-head"><div><div class="kicker">Built around failure</div><h2 class="display">The safeguards matter<br><span class="serif">when life gets messy.</span></h2></div><p>Good inheritance design has to handle uncertainty, unavailable people, false alarms and last-minute intervention — not just the happy path.</p></div>
+      <div class="principles">
+        <article class="card"><span class="card-num">01 / NO SINGLE KEY</span><h3>Distributed authorization</h3><p>No one guardian should be able to unilaterally release protected information.</p></article>
+        <article class="card"><span class="card-num">02 / TIME</span><h3>A window to intervene</h3><p>A legitimate owner should have a meaningful chance to cancel or stop a mistaken recovery attempt.</p></article>
+        <article class="card"><span class="card-num">03 / AUDIT</span><h3>A visible history</h3><p>Recovery attempts, confirmations, cancellations and releases should leave a trace that can be reviewed.</p></article>
+      </div>
+    </section>
+
+    <!-- PEOPLE -->
+    <section class="page" id="page-people">
+      <div class="app-head"><div><div class="kicker">Your circle</div><h1 class="display">Trusted people.</h1></div><p>Choose people who can help establish the facts — without giving any one of them complete control.</p></div>
+      <div class="guardian-grid">
+        <article class="guardian"><div class="avatar">AK</div><h3>Arjun K.</h3><p>Primary trusted person</p><div class="guardian-status"><i></i> Confirmed</div></article>
+        <article class="guardian"><div class="avatar">MS</div><h3>Maya S.</h3><p>Independent confirmation</p><div class="guardian-status"><i></i> Confirmed</div></article>
+        <article class="guardian"><div class="avatar">RV</div><h3>Rohan V.</h3><p>Independent confirmation</p><div class="guardian-status"><i></i> Confirmed</div></article>
+      </div>
+      <div class="trust-band" style="margin-top:14px">
+        <div><div class="kicker">Authorization rule</div><h3>2 of 3 confirmations</h3><p>The configured threshold is designed so one unavailable person does not stop a legitimate recovery, while one person alone cannot release the vault.</p></div>
+        <div class="steps"><div class="step"><b>Independent</b><span>Each person confirms separately.</span></div><div class="step"><b>Bounded</b><span>Their role is limited to the protocol.</span></div><div class="step"><b>Reviewable</b><span>Every confirmation becomes part of the record.</span></div></div>
+      </div>
+    </section>
+
+    <!-- ACTIVITY -->
+    <section class="page" id="page-activity">
+      <div class="app-head"><div><div class="kicker">Audit trail</div><h1 class="display">Activity.</h1></div><p>A quiet record of what changed, what was reviewed and what the protection system has been asked to do.</p></div>
+      <div class="workspace">
+        <div class="panel">
+          <div class="panel-title"><h3>Recent activity</h3><span>Last 30 days</span></div>
+          <div class="activity">
+            <div class="activity-item"><div class="activity-icon">✓</div><div><b>Protection plan reviewed</b><span>Today · Owner</span></div></div>
+            <div class="activity-item"><div class="activity-icon">+</div><div><b>Added “Property documents”</b><span>3 days ago · Owner</span></div></div>
+            <div class="activity-item"><div class="activity-icon">✓</div><div><b>Trusted person confirmed</b><span>6 days ago · Maya S.</span></div></div>
+            <div class="activity-item"><div class="activity-icon">↻</div><div><b>Recovery settings updated</b><span>11 days ago · Owner</span></div></div>
+            <div class="activity-item"><div class="activity-icon">✓</div><div><b>Digital life section reviewed</b><span>14 days ago · Owner</span></div></div>
+          </div>
+        </div>
+        <div class="panel dark">
+          <div class="panel-title"><h3>System posture</h3><span style="color:#a9aabd">Now</span></div>
+          <div style="padding:25px 0"><div style="font-family:'Space Grotesk';font-size:48px;letter-spacing:-.06em">Stable.</div><p style="color:#aaaabd;font-size:12px;line-height:1.6;margin:10px 0 0">No active recovery event. Your current protection rules are in place and the vault is not in a handover state.</p></div>
+          <div class="mini-list"><div class="mini-row"><span>Protection</span><b class="ok">Active</b></div><div class="mini-row"><span>Trusted people</span><b class="ok">3 / 3</b></div><div class="mini-row"><span>Intervention</span><b class="ok">Enabled</b></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SETUP -->
+    <section class="page" id="page-setup">
+      <div class="form-shell">
+        <div class="app-head" style="margin-top:0"><div><div class="kicker">Protection settings</div><h1 class="display">Make the rules yours.</h1></div><p>Set the people and threshold that define your handover protocol. This is the human side of the security model.</p></div>
+        <div class="form-card" data-backend-form="protection-plan">
+          <div class="form-grid">
+            <div class="field"><label>Owner</label><input value="You" aria-label="Owner"></div>
+            <div class="field"><label>Future beneficiary</label><input value="Designated beneficiary" aria-label="Beneficiary"></div>
+            <div class="field full"><label>What should happen?</label><input value="Release only the information explicitly marked for handover." aria-label="Handover instruction"></div>
+            <div class="field full"><label>Confirmation threshold</label>
+              <div class="threshold">
+                <button class="choice" onclick="chooseThreshold(this)"><b>1 of 3</b><span>One confirmation</span></button>
+                <button class="choice selected" onclick="chooseThreshold(this)"><b>2 of 3</b><span>Balanced protocol</span></button>
+                <button class="choice" onclick="chooseThreshold(this)"><b>3 of 3</b><span>All confirmations</span></button>
+              </div>
+            </div>
+            <div class="field"><label>Trusted person 01</label><input value="Arjun K."></div>
+            <div class="field"><label>Trusted person 02</label><input value="Maya S."></div>
+            <div class="field"><label>Trusted person 03</label><input value="Rohan V."></div>
+            <div class="field"><label>Intervention window</label><input value="48 hours"></div>
+          </div>
+          <div class="form-actions"><button class="btn" style="background:#efeee8" onclick="navigate('home')">Cancel</button><button class="btn btn-primary" id="saveProtectionPlan" data-action="save-protection-plan" onclick="saveSettings()">Save protection plan <span>✓</span></button></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="modal-backdrop" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div class="kicker">The Heirloom model</div>
+    <h2>Make the right thing easier to do.</h2>
+    <p>Heirloom separates three ideas that are often mixed together: storing information, deciding who should receive it, and proving that the moment for handover has actually arrived.</p>
+    <p>The interface keeps those ideas visible without exposing implementation details. The result is meant to feel calm when everything is normal — and deliberate when something goes wrong.</p>
+    <button class="btn btn-primary" onclick="closeModal();navigate('protection')">See the protection flow →</button>
+  </div>
+</div>
+
+<script>
+
+/* Opening sequence — one intro, under 8 seconds */
+(function(){
+  const intro=document.getElementById("openingSequence");
+  if(!intro) return;
+  const reduced=window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const hasVisited=sessionStorage.getItem("heirloomIntroSeen");
+  const duration=reduced ? 500 : (hasVisited ? 900 : 6400);
+  if(hasVisited) intro.classList.add("returning");
+  window.setTimeout(()=>{
+    intro.classList.add("is-hidden");
+    document.getElementById("page-home")?.classList.add("intro-complete");
+    window.setTimeout(()=>intro.remove(),760);
+  },duration);
+  sessionStorage.setItem("heirloomIntroSeen","1");
+})();
+
+
+function setTheme(theme){
+  document.documentElement.dataset.theme=theme;
+  localStorage.setItem("heirloomTheme",theme);
+  const btn=document.getElementById("themeToggle");
+  if(btn){
+    btn.innerHTML = theme==="dark"
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.5 14.2A8.6 8.6 0 0 1 9.8 3.5 8.6 8.6 0 1 0 20.5 14.2Z"/></svg>';
+    btn.title=theme==="dark"?"Switch to light mode":"Switch to dark mode";
+  }
+}
+function toggleTheme(){
+  setTheme(document.documentElement.dataset.theme==="dark"?"light":"dark");
+}
+
+const pages = ["home","vault","protection","people","activity","setup"];
+
+function navigate(page){
+  if(!pages.includes(page)) page="home";
+  pages.forEach(p=>{
+    const el=document.getElementById("page-"+p);
+    if(el) el.classList.toggle("active",p===page);
+  });
+  document.querySelectorAll(".nav-link").forEach(btn=>{
+    btn.classList.toggle("active",btn.dataset.page===page);
+  });
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function toggleMenu(){
+  document.getElementById("mobilePanel").classList.toggle("open");
+}
+
+function openModal(){document.getElementById("modal").classList.add("open")}
+function closeModal(){document.getElementById("modal").classList.remove("open")}
+
+function chooseThreshold(button){
+  document.querySelectorAll(".choice").forEach(x=>x.classList.remove("selected"));
+  button.classList.add("selected");
+}
+
+async function saveSettings() {
+  // 1. Gather input field values using their aria-labels or structure
+  const owner = document.querySelector('input[aria-label="Owner"]').value;
+  const beneficiary = document.querySelector('input[aria-label="Beneficiary"]').value;
+  const instruction = document.querySelector('input[aria-label="Handover instruction"]').value;
+  
+  // 2. Get the currently selected threshold button text (e.g., "2 of 3")
+  const selectedChoice = document.querySelector('.threshold .choice.selected b');
+  const threshold = selectedChoice ? selectedChoice.textContent : '2 of 3';
+
+  // 3. Gather trusted persons and intervention window inputs
+  const allInputs = document.querySelectorAll('.form-grid input');
+  const guardians = [
+    allInputs[3]?.value, // Trusted person 01
+    allInputs[4]?.value, // Trusted person 02
+    allInputs[5]?.value  // Trusted person 03
+  ].filter(Boolean);
+
+  const interventionWindow = allInputs[6]?.value || '48 hours';
+
+  // 4. Construct payload object
+  const payload = {
+    owner,
+    beneficiary,
+    instruction,
+    threshold,
+    guardians,
+    interventionWindow
+  };
+
+  try {
+    // 5. Send data to your backend API endpoint
+    const response = await fetch('http://127.0.0.1:8000/api/protection-plan', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // Uncomment when JWT authentication is ready:
+        // 'Authorization': 'Bearer ' + localStorage.getItem('authToken')
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.status}`);
+    }
+
+    const result = await response.json();
+    
+    // 6. Success handling
+    localStorage.setItem("heirloomSettingsSaved", "1");
+    showToast("Protection plan successfully saved to server.");
+    navigate("activity");
+    
+  } catch (error) {
+    console.error("Failed to save protection plan:", error);
+    showToast("Error saving plan. Check server connection.");
+  }
+}
+function showToast(message){
+  const toast=document.createElement("div");
+  toast.className="toast";
+  toast.textContent=message;
+  document.body.appendChild(toast);
+  setTimeout(()=>toast.remove(),2800);
+}
+
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape") closeModal();
+});
+
+window.addEventListener("resize",()=>{
+  if(window.innerWidth>760) document.getElementById("mobilePanel").classList.remove("open");
+});
+
+(function init(){
+  const saved=localStorage.getItem("heirloomTheme");
+  const preferred=window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  setTheme(saved || preferred);
+})();
+let isSignUpMode = false;
+
+// Open the Modal (Call this function from your "Sign In" or "Get Started" buttons)
+function openAuthModal(signup = false) {
+    isSignUpMode = signup;
+    updateAuthModalUI();
+    document.getElementById('authModal').classList.remove('hidden');
+}
+
+// Close the Modal
+function closeAuthModal() {
+    document.getElementById('authModal').classList.add('hidden');
+}
+
+// Toggle between Login and Register views
+function toggleAuthMode() {
+    isSignUpMode = !isSignUpMode;
+    updateAuthModalUI();
+}
+
+function updateAuthModalUI() {
+    const title = document.getElementById('authModalTitle');
+    const subtitle = document.getElementById('authModalSubtitle');
+    const submitBtn = document.getElementById('authSubmitBtn');
+    const toggleText = document.getElementById('authToggleText');
+    const toggleLink = document.querySelector('#authModal button[onclick="toggleAuthMode()"]');
+
+    if (isSignUpMode) {
+        title.textContent = "Create your account";
+        subtitle.textContent = "Start securing your legacy today";
+        submitBtn.textContent = "Sign Up";
+        toggleText.textContent = "Already have an account?";
+        toggleLink.textContent = "Sign in";
+    } else {
+        title.textContent = "Welcome to Heirloom";
+        subtitle.textContent = "Sign in to access your secure vault";
+        submitBtn.textContent = "Sign In";
+        toggleText.textContent = "Don't have an account?";
+        toggleLink.textContent = "Create account";
+    }
+}
+// Function to show the dashboard and hide public views
+function showVaultDashboard() {
+    const landingView = document.getElementById('landingView'); // Replace with your main landing wrapper ID if different
+    const dashboard = document.getElementById('vaultDashboard');
+    
+    if (landingView) landingView.classList.add('hidden');
+    if (dashboard) dashboard.classList.remove('hidden');
+}
+
+// Function to handle logging out
+function handleLogout() {
+    localStorage.removeItem('authToken');
+    const landingView = document.getElementById('landingView');
+    const dashboard = document.getElementById('vaultDashboard');
+    
+    if (dashboard) dashboard.classList.add('hidden');
+    if (landingView) landingView.classList.remove('hidden');
+    alert('Signed out successfully.');
+}
+
+// Check on page load if user is already logged in
+window.addEventListener('DOMContentLoaded', () => {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+        showVaultDashboard();
+    }
+});
+
+// Handle Form Submission & Connect to Backend API
+// Include the new dashboard page in your page router list
+const pages = ["home","vault","protection","people","activity","setup","vault-dashboard"];
+
+// Update your handleAuthSubmit function to transition seamlessly:
+async function handleAuthSubmit(event) {
+    event.preventDefault();
+    const email = document.getElementById('authEmail').value;
+    const password = document.getElementById('authPassword').value;
+
+    const endpoint = isSignUpMode ? '/api/auth/register' : '/api/auth/login';
+
+    try {
+        // Mock successful authentication network delay
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        const data = {
+            token: 'mock-jwt-token-xyz123',
+            message: isSignUpMode ? 'Account created successfully!' : 'Signed in successfully!'
+        };
+
+        // Save token securely
+        localStorage.setItem('authToken', data.token);
+        
+        showToast(isSignUpMode ? 'Account created successfully!' : 'Signed in successfully!');
+        closeAuthModal();
+        
+        // Instantly navigate to the inner vault dashboard view
+        navigate('vault-dashboard');
+        
+    } catch (error) {
+        showToast(error.message || 'Authentication failed');
+    }
+}
+
+// Logout handler
+function handleLogout() {
+    localStorage.removeItem('authToken');
+    showToast('Signed out successfully.');
+    navigate('home');
+}
+
+// Check session on page load
+window.addEventListener('DOMContentLoaded', () => {
+    const token = localStorage.getItem('authToken');
+    if (token && window.location.hash === '#dashboard') {
+        navigate('vault-dashboard');
+    }
+});
+const API_BASE = 'http://127.0.0.1:8000/api';
+
+// 1. Load and display the plan status when the page opens
+async function fetchPlanStatus(ownerEmail) {
+    try {
+        const response = await fetch(`${API_BASE}/protection-plan/status/${ownerEmail}`);
+        if (!response.ok) throw new Error("Plan not found");
+        
+        const data = await response.json();
+        const evaluation = data.evaluation;
+
+        // Update UI Elements (Make sure your HTML has elements with these IDs!)
+        console.log("Current Plan State:", evaluation.current_state);
+        
+        const statusEl = document.getElementById('plan-state-display');
+        if (statusEl) statusEl.innerText = evaluation.current_state;
+
+        const daysEl = document.getElementById('days-remaining-display');
+        if (daysEl) daysEl.innerText = evaluation.days_remaining;
+
+    } catch (error) {
+        console.log("No active plan found for this user yet.");
+    }
+}
+
+// 2. Send Heartbeat when user clicks "Check In"
+async function triggerHeartbeat(ownerEmail) {
+    try {
+        const response = await fetch(`${API_BASE}/protection-plan/heartbeat`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ owner: ownerEmail })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            alert("✅ Check-in recorded! Your dead man's switch timer has been reset.");
+            // Refresh status immediately
+            fetchPlanStatus(ownerEmail);
+        } else {
+            alert("Failed to record check-in.");
+        }
+    } catch (error) {
+        console.error("Network error during heartbeat:", error);
+        alert("Could not connect to the backend server.");
+    }
+}
+
+// Auto-run on page load (replace with your test user email or dynamic state)
+window.addEventListener('DOMContentLoaded', () => {
+    const testOwner = "alice@example.com"; 
+    fetchPlanStatus(testOwner);
+
+    // Hook up a button if you have one with ID 'checkInBtn'
+    const checkInBtn = document.getElementById('checkInBtn');
+    if (checkInBtn) {
+        checkInBtn.addEventListener('click', () => triggerHeartbeat(testOwner));
+    }
+});
+// --- FastAPI Backend Integration ---
+// --- Corrected FastAPI Backend Integration (using /api/recovery) ---
+const BACKEND_API = 'http://127.0.0.1:8000/api/recovery';
+
+async function fetchLivePlanStatus(ownerEmail = "alice@example.com") {
+    try {
+        const response = await fetch(`${BACKEND_API}/status`);
+        if (!response.ok) throw new Error("Status fetch failed");
+        
+        const data = await response.json();
+
+        const stateEl = document.getElementById('plan-state-display');
+        const daysEl = document.getElementById('days-remaining-display');
+
+        if (stateEl) stateEl.textContent = data.current_state || "ACTIVE";
+        if (daysEl) daysEl.textContent = data.days_remaining ?? "48h";
+    } catch (err) {
+        console.warn("Backend offline or plan not initialized yet:", err);
+        const stateEl = document.getElementById('plan-state-display');
+        if (stateEl) stateEl.textContent = "ACTIVE";
+    }
+}
+
+async function sendLiveHeartbeat(ownerEmail = "alice@example.com") {
+    try {
+        const response = await fetch(`http://127.0.0.1:8000/api/recovery/trigger`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ owner: ownerEmail })
+        });
+        
+        if (response.ok) {
+            showToast("✅ Check-in recorded! Timer has been reset.");
+            fetchLivePlanStatus(ownerEmail);
+        } else {
+            showToast("Failed to record check-in.");
+        }
+    } catch (err) {
+        console.error("Heartbeat connection error:", err);
+        showToast("Could not reach backend server.");
+    }
+}
+
+// Automatically fetch status on page load and wire up button
+window.addEventListener('DOMContentLoaded', () => {
+    fetchLivePlanStatus();
+
+    const checkInButton = document.getElementById('liveCheckInBtn');
+    if (checkInButton) {
+        checkInButton.addEventListener('click', () => sendLiveHeartbeat());
+    }
+});
+</script>
+<!-- Authentication Modal -->
+<!-- Authentication Modal -->
+<div id="authModal" class="auth-modal-backdrop hidden">
+    <div class="auth-modal-card">
+        <!-- Close Button -->
+        <button onclick="closeAuthModal()" class="modal-close" style="position: absolute; top: 24px; right: 24px;">×</button>
+
+        <!-- Modal Header -->
+        <div style="text-align: center; margin-bottom: 24px;">
+            <h3 id="authModalTitle" class="display" style="font-size: 24px; margin-bottom: 6px;">Welcome to Heirloom</h3>
+            <p id="authModalSubtitle" class="muted" style="font-size: 13px; margin: 0;">Sign in to access your secure vault</p>
+        </div>
+
+        <!-- Auth Form -->
+        <form id="authForm" onsubmit="handleAuthSubmit(event)">
+            <div class="field">
+                <label style="display: block; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 7px;">Email Address</label>
+                <input type="email" id="authEmail" required placeholder="you@example.com">
+            </div>
+            <div class="field" style="margin-bottom: 24px;">
+                <label style="display: block; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 7px;">Password</label>
+                <input type="password" id="authPassword" required placeholder="••••••••">
+            </div>
+
+            <button type="submit" id="authSubmitBtn" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                Sign In
+            </button>
+        </form>
+
+        <!-- Toggle Switcher -->
+        <div style="text-align: center; margin-top: 20px; font-size: 12px;" class="muted">
+            <span id="authToggleText">Don't have an account?</span>
+            <button type="button" onclick="toggleAuthMode()" style="background: none; border: none; color: var(--ink); font-weight: 700; text-decoration: underline; margin-left: 4px; cursor: pointer;">Create account</button>
+        </div>
+    </div>
+    <!-- Main Vault Dashboard (Hidden by default until logged in) -->
+<main id="vaultDashboard" class="hidden" style="max-width: 1100px; margin: 40px auto; padding: 0 20px;">
+    <!-- Dashboard Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+        <div>
+            <h1 class="display" style="font-size: 32px; margin-bottom: 4px;">Your Secure Vault</h1>
+            <p class="muted" style="margin: 0; font-size: 14px;">End-to-end encrypted storage for your family legacy.</p>
+        </div>
+        <button onclick="handleLogout()" class="btn" style="background: var(--soft); border: 1px solid var(--line); color: var(--ink); padding: 10px 16px; border-radius: 12px; cursor: pointer;">
+            Sign Out
+        </button>
+    </div>
+
+    <!-- Vault Grid Stats / Overview -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 32px;">
+        <div style="background: var(--paper); border: 1px solid var(--line); padding: 24px; border-radius: 20px; box-shadow: var(--shadow);">
+            <div class="muted" style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Stored Assets</div>
+            <div class="display" style="font-size: 28px;">12 Items</div>
+        </div>
+        <div style="background: var(--paper); border: 1px solid var(--line); padding: 24px; border-radius: 20px; box-shadow: var(--shadow);">
+            <div class="muted" style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Security Status</div>
+            <div style="font-size: 16px; font-weight: 600; color: #10b981; display: flex; align-items: center; gap: 6px;">
+                <span style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block;"></span> Fully Protected
+            </div>
+        </div>
+    </div>
+
+    <!-- Vault Content Section -->
+    <div style="background: var(--paper); border: 1px solid var(--line); border-radius: 24px; padding: 32px; box-shadow: var(--shadow);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 class="display" style="font-size: 20px; margin: 0;">Recent Heirlooms</h3>
+            <button class="btn btn-primary" style="padding: 8px 16px; font-size: 13px;">+ Add New Item</button>
+        </div>
+        <div class="muted" style="text-align: center; padding: 40px 0; border: 2px dashed var(--line); border-radius: 16px;">
+            Your vault items will appear here. Click "+ Add New Item" to start uploading documents or memories.
+        </div>
+    </div>
+    <!-- INNER VAULT DASHBOARD (Shown after successful login) -->
+    <section class="page" id="page-vault-dashboard">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+            <div>
+                <div class="kicker">Secure Environment</div>
+                <h1 class="display" style="font-size: 38px; margin: 6px 0 0;">Your Secure Vault</h1>
+                <p class="muted" style="margin: 0; font-size: 14px;">End-to-end encrypted storage for your family legacy and instructions.</p>
+            </div>
+            <button onclick="handleLogout()" class="btn btn-ghost" style="color: var(--ink); border-color: var(--line);">
+                Sign Out ↗
+            </button>
+        </div>
+
+        <!-- Stats Overview -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 28px;">
+            <div class="card" style="padding: 24px;">
+                <div class="muted" style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Stored Assets</div>
+                <div class="display" style="font-size: 32px;" id="vaultItemCount">12 Items</div>
+            </div>
+            <div class="card" style="padding: 24px;">
+                <div class="muted" style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Security Status</div>
+                <div style="font-size: 15px; font-weight: 600; color: #6eaa79; display: flex; align-items: center; gap: 8px; margin-top: 6px;">
+                    <span style="width: 8px; height: 8px; background: #6eaa79; border-radius: 50%; display: inline-block;"></span> Fully Protected
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Panel -->
+        <div class="panel">
+            <div class="panel-title">
+                <h3>Active Heirlooms & Documents</h3>
+                <button class="btn btn-primary" style="padding: 8px 16px; font-size: 12px;" onclick="showToast('Item creation modal ready!')">+ Add New Item</button>
+            </div>
+            <div class="muted" style="text-align: center; padding: 48px 0; border: 2px dashed var(--line); border-radius: 16px; font-size: 13px;">
+                Your encrypted vault items are loaded. Use "+ Add New Item" to upload documents, access keys, or instructions.
+            </div>
+        </div>
+    </section>
+</main>
+</div>
+</div>
+</body>
+</html>
